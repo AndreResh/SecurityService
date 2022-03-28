@@ -23,7 +23,7 @@ public class Users {
     private String username;
     private String email;
     private String password;
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
 
     public Users(String username, String email, String password) {

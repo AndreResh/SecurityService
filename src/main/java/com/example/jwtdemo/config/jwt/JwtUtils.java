@@ -12,31 +12,30 @@ import java.util.Date;
 
 @Component
 public class JwtUtils {
-    @Value("${app.jwtSecret}")
+    @Value("${my.app.secret}")
     private String jwtSecret;
-    @Value("${app.jwtExpirationMs}")
+    @Value("${my.app.expiration}")
     private int jwtExpirationMs;
 
     public String generateJwtToken(Authentication authentication) {
         UsersDetailsImpl usersDetails = (UsersDetailsImpl) authentication.getPrincipal();
-        return Jwts.builder().setSubject(usersDetails.getUsername()).setIssuedAt(new Date())
+        return Jwts.builder().setSubject((usersDetails.getUsername())).setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
     }
 
     public boolean validateJwtToken(String jwt) {
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJwt(jwt);
+            System.out.println(jwt);
+            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwt);
             return true;
-        } catch (MalformedJwtException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+        } catch (MalformedJwtException | IllegalArgumentException e) {
+            System.err.println(e.getMessage());
         }
         return false;
     }
 
     public String getUserNameFromJwtToken(String jwt) {
-        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJwt(jwt).getBody().getSubject();
+        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwt).getBody().getSubject();
     }
 }

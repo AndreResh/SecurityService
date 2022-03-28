@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @EnableWebSecurity
-
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     UserDetailsServiceImpl userDetailsService;
@@ -40,7 +39,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
                 .mvcMatchers("/api/auth/**").permitAll()
-                .mvcMatchers("/api/test/**").permitAll()
+                .mvcMatchers("/api/test/user").hasAnyRole("USER","ADMIN","MODERATOR")
+                .mvcMatchers("/api/test/mod").hasAnyRole("ADMIN","MODERATOR")
+                .mvcMatchers("/api/test/admin").hasAnyRole("ADMIN")
                 .anyRequest().authenticated();
         http.addFilterBefore(authJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
