@@ -41,11 +41,11 @@ public class UsersService {
         this.jwtUtils = jwtUtils;
     }
 
-    public Users save(SignupRequest signupRequest){
-        if (usersRepository.existsByEmail(signupRequest.getEmail()) || usersRepository.existsByUsername(signupRequest.getUsername())) {
+    public Users register(SignupRequest signupRequest){
+        if ( usersRepository.existsByUsername(signupRequest.getUsername())) {
            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-        Users users = new Users(signupRequest.getUsername(), signupRequest.getEmail(), encoder.encode(signupRequest.getPassword()));
+        Users users = new Users(signupRequest.getUsername(), encoder.encode(signupRequest.getPassword()));
         Set<String> reqRoles = signupRequest.getRoles();
         Set<Role> roles = new HashSet<>();
         if (reqRoles == null) {
@@ -72,7 +72,7 @@ public class UsersService {
         users.setRoles(roles);
         return usersRepository.save(users);
     }
-    public JwtResponse signin(LoginRequest loginRequest){
+    public JwtResponse login(LoginRequest loginRequest){
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -80,6 +80,6 @@ public class UsersService {
         UsersDetailsImpl usersDetails = (UsersDetailsImpl) authentication.getPrincipal();
         List<String> roles = usersDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-        return new JwtResponse(jwt, usersDetails.getId(), usersDetails.getUsername(), usersDetails.getEmail(), roles);
+        return new JwtResponse(jwt, usersDetails.getId(), usersDetails.getUsername(), roles);
     }
 }

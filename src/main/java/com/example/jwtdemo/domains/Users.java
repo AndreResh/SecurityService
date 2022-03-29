@@ -11,24 +11,17 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-//@Table(name = "users",
-//        uniqueConstraints = {
-//                @UniqueConstraint(columnNames = "email"),
-//                @UniqueConstraint(columnNames = "username")
-//        })
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String username;
-    private String email;
     private String password;
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
 
-    public Users(String username, String email, String password) {
+    public Users(String username,String password) {
         this.username = username;
-        this.email = email;
         this.password = password;
     }
 }

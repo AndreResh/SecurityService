@@ -12,14 +12,12 @@ import java.util.stream.Collectors;
 public class UsersDetailsImpl implements UserDetails {
     private Long id;
     private String username;
-    private String email;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UsersDetailsImpl(Long id, String username, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    public UsersDetailsImpl(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
-        this.email = email;
         this.password = password;
         this.authorities = authorities;
     }
@@ -30,7 +28,6 @@ public class UsersDetailsImpl implements UserDetails {
                 .collect(Collectors.toList());
         return new UsersDetailsImpl(users.getId(),
                 users.getUsername(),
-                users.getEmail(),
                 users.getPassword(),
                 authorities);
     }
@@ -42,10 +39,6 @@ public class UsersDetailsImpl implements UserDetails {
 
     public Long getId() {
         return id;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     @Override
