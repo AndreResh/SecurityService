@@ -19,18 +19,18 @@ public class JwtUtils {
 
     public String generateJwtToken(Authentication authentication) {
         UsersDetailsImpl usersDetails = (UsersDetailsImpl) authentication.getPrincipal();
-        return Jwts.builder().setSubject((usersDetails.getUsername())).setIssuedAt(new Date())
+        System.out.println(usersDetails.getUsername());
+        return Jwts.builder().setSubject((usersDetails.getId()+" "+usersDetails.getUsername()+" "+usersDetails.getAuthorities())).setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
     }
 
     public boolean validateJwtToken(String jwt) {
         try {
-            System.out.println(jwt);
             Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwt);
             return true;
         } catch (MalformedJwtException | IllegalArgumentException e) {
-            System.err.println(e.getMessage());
+            System.err.println(e.getLocalizedMessage());
         }
         return false;
     }
