@@ -39,9 +39,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
                 .mvcMatchers("/api/auth/**","/api/test/all").permitAll()
-                .mvcMatchers("/api/test/user").hasAnyRole("USER","ADMIN","MODERATOR")
-                .mvcMatchers("/api/test/mod").hasAnyRole("ADMIN","MODERATOR")
-                .mvcMatchers("/api/test/admin").hasAnyRole("ADMIN")
+                .mvcMatchers("/api/test/user").hasAnyRole("USER","BOSS","CREATOR")
+                .mvcMatchers("/api/test/mod").hasAnyRole("BOSS","CREATOR")
+                .mvcMatchers("/api/test/admin").hasAnyRole("BOSS")
                 .anyRequest().authenticated();
         http.addFilterBefore(authJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }

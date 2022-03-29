@@ -58,7 +58,7 @@ public class UsersService {
                         Role adminRole = roleRepository.findByName(ERole.ROLE_BOSS).get();
                         roles.add(adminRole);
                         break;
-                    case "mod":
+                    case "creator":
                         Role modRole = roleRepository.findByName(ERole.ROLE_CREATOR).get();
                         roles.add(modRole);
                         break;

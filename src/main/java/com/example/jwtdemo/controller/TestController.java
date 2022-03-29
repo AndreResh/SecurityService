@@ -19,10 +19,10 @@ public class TestController {
     }
     @GetMapping("/mod")
     public String getApiMod(){
-        return "MOD API";
+        return "CREATOR API";
     }
     @GetMapping("/admin")
     public String getApiAdmin(){
-        return "ADMIN API";
+        return "BOSS API";
     }
 }
