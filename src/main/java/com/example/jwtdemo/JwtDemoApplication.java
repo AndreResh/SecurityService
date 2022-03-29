@@ -15,12 +15,18 @@ public class JwtDemoApplication {
         SpringApplication.run(JwtDemoApplication.class, args);
     }
 
-//    @Bean
-//    public CommandLineRunner runner(RoleRepository repository) {
-//        return args -> {
-//          repository.save(new Role(ERole.ROLE_USER));
-//            repository.save(new Role(ERole.ROLE_MODERATOR));
-//            repository.save(new Role(ERole.ROLE_ADMIN));
-//        };
-//    }
+    @Bean
+    public CommandLineRunner runner(RoleRepository repository) {
+        return args -> {
+            if (!repository.findByName(ERole.ROLE_USER).isPresent()) {
+                repository.save(new Role(ERole.ROLE_USER));
+            }
+            if (!repository.findByName(ERole.ROLE_CREATOR).isPresent()) {
+                repository.save(new Role(ERole.ROLE_CREATOR));
+            }
+            if (!repository.findByName(ERole.ROLE_BOSS).isPresent()) {
+                repository.save(new Role(ERole.ROLE_BOSS));
+            }
+        };
+    }
 }
