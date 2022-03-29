@@ -19,7 +19,6 @@ public class JwtUtils {
 
     public String generateJwtToken(Authentication authentication) {
         UsersDetailsImpl usersDetails = (UsersDetailsImpl) authentication.getPrincipal();
-        System.out.println(usersDetails.getUsername());
         return Jwts.builder().setSubject((usersDetails.getId()+" "+usersDetails.getUsername()+" "+usersDetails.getAuthorities())).setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
