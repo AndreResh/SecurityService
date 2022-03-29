@@ -38,7 +38,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().authenticationEntryPoint(authEntryPointJwt).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
-                .mvcMatchers("/api/authenticate/**","/api/test/all").permitAll()
+                .mvcMatchers("/authenticate/**","/api/test/all").permitAll()
                 .mvcMatchers("/api/test/user").hasAnyRole("USER","BOSS","CREATOR")
                 .mvcMatchers("/api/test/mod").hasAnyRole("BOSS","CREATOR")
                 .mvcMatchers("/api/test/admin").hasAnyRole("BOSS")
