@@ -42,30 +42,7 @@ public class UsersService {
            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         Users users = new Users(signupRequest.getUsername(), encoder.encode(signupRequest.getPassword()));
-        Set<String> reqRoles = signupRequest.getRoles();
-        Set<Role> roles = new HashSet<>();
-        if (reqRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER).get();
-            roles.add(userRole);
-        } else {
-            reqRoles.forEach(r -> {
-                switch (r) {
-                    case "boss":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_BOSS).get();
-                        roles.add(adminRole);
-                        break;
-                    case "creator":
-                        Role modRole = roleRepository.findByName(ERole.ROLE_CREATOR).get();
-                        roles.add(modRole);
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER).get();
-                        roles.add(userRole);
-                        break;
-                }
-            });
-        }
-        users.setRoles(roles);
+        users.setRoles(Set.of(roleRepository.findByName(ERole.ROLE_USER).get()));
         users.setId(createUser(signupRequest.getUsername()));
         return usersRepository.save(users);
     }
