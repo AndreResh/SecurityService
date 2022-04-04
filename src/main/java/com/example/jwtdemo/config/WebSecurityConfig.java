@@ -17,10 +17,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    UserDetailsServiceImpl userDetailsService;
-    @Autowired
-    private AuthEntryPointJwt authEntryPointJwt;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final AuthEntryPointJwt authEntryPointJwt;
+
+    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt authEntryPointJwt) {
+        this.userDetailsService = userDetailsService;
+        this.authEntryPointJwt = authEntryPointJwt;
+    }
 
     @Bean
     public AuthTokenFilter authJwtTokenFilter() {
@@ -38,10 +41,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().authenticationEntryPoint(authEntryPointJwt).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
-                .mvcMatchers("/authenticate/**","/api/test/all").permitAll()
-                .mvcMatchers("/api/test/user").hasAnyRole("USER","BOSS","CREATOR")
-                .mvcMatchers("/api/test/mod").hasAnyRole("BOSS","CREATOR")
-                .mvcMatchers("/api/test/admin").hasAnyRole("BOSS")
+                .mvcMatchers("/authenticate/**").permitAll()
                 .anyRequest().authenticated();
         http.addFilterBefore(authJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }
