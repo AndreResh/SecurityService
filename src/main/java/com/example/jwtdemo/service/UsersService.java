@@ -44,7 +44,7 @@ public class UsersService {
     @Value("${user.app.secret}")
     private String jwtForUserService;
     @Value("${user.app.time}")
-    private String jwtTimeForUserService;
+    private int jwtTimeForUserService;
 
     public Users register(SignupRequest signupRequest) {
         if (usersRepository.existsByUsername(signupRequest.getUsername())) {
