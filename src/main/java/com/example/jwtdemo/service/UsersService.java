@@ -81,7 +81,7 @@ public class UsersService {
                 .setExpiration(new Date((new Date()).getTime() + jwtTimeForUserService))
                 .signWith(SignatureAlgorithm.HS512, jwtForUserService).compact();
         return new HttpHeaders(){{
-            set("Authorization", jwt);
+            set("Authorization", "Bearer "+jwt);
         }};
     }
 
