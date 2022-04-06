@@ -4,9 +4,11 @@ import com.example.jwtdemo.pojo.ChangePassword;
 import com.example.jwtdemo.pojo.LoginRequest;
 import com.example.jwtdemo.pojo.SignupRequest;
 import com.example.jwtdemo.service.UsersService;
+import io.swagger.annotations.ApiImplicitParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -37,8 +39,9 @@ public class AuthController {
     }
 
     @PatchMapping("/{id}/changePassword")
-    public ResponseEntity<?> changePassword(@PathVariable("id") Long id, @AuthenticationPrincipal UserDetails details, @RequestBody ChangePassword changePassword) {
+    @ApiImplicitParam(name = "Authorization", value = "Access Token", required = true, paramType = "header", example = "Bearer access_token")
+    public ResponseEntity<?> changePassword(@PathVariable("id") Long id, @RequestBody ChangePassword changePassword) {
         log.info("Change password: {}", changePassword);
-        return ResponseEntity.ok(usersService.changePassword(id, changePassword, details));
+        return ResponseEntity.ok(usersService.changePassword(id, changePassword));
     }
 }

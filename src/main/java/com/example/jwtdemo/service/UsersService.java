@@ -77,29 +77,24 @@ public class UsersService {
     }
 
     private HttpHeaders createHeader(String username) {
-        String jwt=Jwts.builder().setSubject(username).setIssuedAt(new Date())
+        String jwt = Jwts.builder().setSubject(username).setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtTimeForUserService))
                 .signWith(SignatureAlgorithm.HS512, jwtForUserService).compact();
-        return new HttpHeaders(){{
-            set("Authorization", "Bearer "+jwt);
+        return new HttpHeaders() {{
+            set("Authorization", "Bearer " + jwt);
         }};
     }
 
-    public Users changePassword(Long id, ChangePassword changePassword, UserDetails details) {
-        if (details == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+    public Users changePassword(Long id, ChangePassword changePassword) {
+        Optional<Users> optionalUsers= usersRepository.findById(id);
+        if(!optionalUsers.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        try {
-            Users users1 = usersRepository.findById(id).get();
-            Users users2 = usersRepository.findByUsername(details.getUsername()).get();
-            System.out.println(encoder.matches(changePassword.getOldPassword(), users2.getPassword()));
-            if (!users1.getUsername().equals(users2.getUsername()) || !encoder.matches(changePassword.getOldPassword(), users2.getPassword())) {
-                throw new RuntimeException();
-            }
-            users1.setPassword(encoder.encode(changePassword.getNewPassword()));
-            return usersRepository.save(users1);
-        } catch (Exception e) {
+        Users users=optionalUsers.get();
+        if (!encoder.matches(changePassword.getOldPassword(), users.getPassword())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
+        users.setPassword(encoder.encode(changePassword.getNewPassword()));
+        return usersRepository.save(users);
     }
 }
