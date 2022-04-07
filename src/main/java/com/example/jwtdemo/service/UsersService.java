@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -68,12 +69,16 @@ public class UsersService {
     }
 
     private Long createUser(String username) {
-        ResponseEntity<UserResponse> responseEntity = restTemplate.postForEntity(userURL,
-                new HttpEntity<>(Map.of("name", username), createHeader(username)), UserResponse.class);
-        if (Objects.requireNonNull(responseEntity.getBody()).getUserId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can't create user");
+        try {
+            ResponseEntity<UserResponse> responseEntity = restTemplate.postForEntity(userURL,
+                    new HttpEntity<>(Map.of("name", username), createHeader(username)), UserResponse.class);
+            if (Objects.requireNonNull(responseEntity.getBody()).getUserId() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can't create user");
+            }
+            return responseEntity.getBody().getUserId();
+        } catch (HttpClientErrorException e){
+            throw new ResponseStatusException(e.getStatusCode());
         }
-        return responseEntity.getBody().getUserId();
     }
 
     private HttpHeaders createHeader(String username) {
