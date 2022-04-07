@@ -48,7 +48,7 @@ public class UsersService {
 
     public Users register(SignupRequest signupRequest) {
         if (usersRepository.existsByUsername(signupRequest.getUsername())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User in DB");
         }
         Users users = new Users(signupRequest.getUsername(), encoder.encode(signupRequest.getPassword()));
         users.setRoles(Set.of(roleRepository.findByName(ERole.ROLE_USER).get()));
@@ -71,7 +71,7 @@ public class UsersService {
         ResponseEntity<UserResponse> responseEntity = restTemplate.postForEntity(userURL,
                 new HttpEntity<>(Map.of("name", username), createHeader(username)), UserResponse.class);
         if (Objects.requireNonNull(responseEntity.getBody()).getUserId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can't create user");
         }
         return responseEntity.getBody().getUserId();
     }
@@ -85,14 +85,18 @@ public class UsersService {
         }};
     }
 
-    public Users changePassword(Long id, ChangePassword changePassword) {
-        Optional<Users> optionalUsers= usersRepository.findById(id);
-        if(!optionalUsers.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    public Users changePassword(Long id, ChangePassword changePassword, UserDetails details) {
+        Optional<Users> optionalUsers1= usersRepository.findById(id);
+        Optional<Users> optionalUsers2 = usersRepository.findByUsername(details.getUsername());
+        if(!optionalUsers1.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with this id not fount");
         }
-        Users users=optionalUsers.get();
+        Users users=optionalUsers1.get();
+        if(!optionalUsers2.get().getId().equals(users.getId())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
         if (!encoder.matches(changePassword.getOldPassword(), users.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password doesn't equals your old password");
         }
         users.setPassword(encoder.encode(changePassword.getNewPassword()));
         return usersRepository.save(users);
