@@ -92,7 +92,12 @@ public class UsersService {
 
     public Users changePassword(Long id, ChangePassword changePassword, UserDetails details) {
         Optional<Users> optionalUsers1= usersRepository.findById(id);
-        Optional<Users> optionalUsers2 = usersRepository.findByUsername(details.getUsername());
+        Optional<Users> optionalUsers2;
+        try {
+             optionalUsers2 = usersRepository.findByUsername(details.getUsername());
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
         if(!optionalUsers1.isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with this id not fount");
         }

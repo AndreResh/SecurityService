@@ -1,5 +1,6 @@
 package com.example.jwtdemo.controller;
 
+import com.example.jwtdemo.domains.Users;
 import com.example.jwtdemo.pojo.ChangePassword;
 import com.example.jwtdemo.pojo.LoginRequest;
 import com.example.jwtdemo.pojo.SignupRequest;
@@ -35,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
+    public ResponseEntity<Users> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
         log.info("Register user: {}", signupRequest);
         return ResponseEntity.ok(usersService.register(signupRequest));
     }
