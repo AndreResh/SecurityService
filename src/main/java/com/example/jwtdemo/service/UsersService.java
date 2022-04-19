@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -48,7 +49,7 @@ public class UsersService {
 
     public Users register(SignupRequest signupRequest) {
         if (usersRepository.existsByUsername(signupRequest.getUsername())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User in DB");
         }
         Users users = new Users(signupRequest.getUsername(), encoder.encode(signupRequest.getPassword()));
         users.setRoles(Set.of(roleRepository.findByName(ERole.ROLE_USER).get()));
@@ -68,38 +69,46 @@ public class UsersService {
     }
 
     private Long createUser(String username) {
-        ResponseEntity<UserResponse> responseEntity = restTemplate.postForEntity(userURL,
-                new HttpEntity<>(Map.of("name", username), createHeader(username)), UserResponse.class);
-        if (Objects.requireNonNull(responseEntity.getBody()).getUserId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        try {
+            ResponseEntity<UserResponse> responseEntity = restTemplate.postForEntity(userURL,
+                    new HttpEntity<>(Map.of("name", username), createHeader(username)), UserResponse.class);
+            if (Objects.requireNonNull(responseEntity.getBody()).getUserId() == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can't create user");
+            }
+            return responseEntity.getBody().getUserId();
+        } catch (HttpClientErrorException e){
+            throw new ResponseStatusException(e.getStatusCode());
         }
-        return responseEntity.getBody().getUserId();
     }
 
     private HttpHeaders createHeader(String username) {
-        String jwt=Jwts.builder().setSubject(username).setIssuedAt(new Date())
+        String jwt = Jwts.builder().setSubject(username).setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtTimeForUserService))
                 .signWith(SignatureAlgorithm.HS512, jwtForUserService).compact();
-        return new HttpHeaders(){{
-            set("Authorization", "Bearer "+jwt);
+        return new HttpHeaders() {{
+            set("Authorization", "Bearer " + jwt);
         }};
     }
 
     public Users changePassword(Long id, ChangePassword changePassword, UserDetails details) {
-        if (details == null) {
+        Optional<Users> optionalUsers1= usersRepository.findById(id);
+        Optional<Users> optionalUsers2;
+        try {
+             optionalUsers2 = usersRepository.findByUsername(details.getUsername());
+        } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
-        try {
-            Users users1 = usersRepository.findById(id).get();
-            Users users2 = usersRepository.findByUsername(details.getUsername()).get();
-            System.out.println(encoder.matches(changePassword.getOldPassword(), users2.getPassword()));
-            if (!users1.getUsername().equals(users2.getUsername()) || !encoder.matches(changePassword.getOldPassword(), users2.getPassword())) {
-                throw new RuntimeException();
-            }
-            users1.setPassword(encoder.encode(changePassword.getNewPassword()));
-            return usersRepository.save(users1);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if(!optionalUsers1.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with this id not fount");
         }
+        Users users=optionalUsers1.get();
+        if(!optionalUsers2.get().getId().equals(users.getId())){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+        if (!encoder.matches(changePassword.getOldPassword(), users.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password doesn't equals your old password");
+        }
+        users.setPassword(encoder.encode(changePassword.getNewPassword()));
+        return usersRepository.save(users);
     }
 }
